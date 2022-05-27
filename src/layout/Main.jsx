@@ -1,52 +1,44 @@
-import React from "react";
-import { Movies } from "../components/Movies";
-import { Preloader } from "../components/preloader";
-import { Search } from "../components/Search";
+import React, { useState, useEffect } from 'react';
+import { Movies } from '../components/Movies';
+import { Preloader } from '../components/preloader';
+import { Search } from '../components/Search';
 
-class Main extends React.Component {
-  state = {
-    movies: [],
-    loading: true,
-  };
+function Main() {
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  componentDidMount() {
+  useEffect(() => {
     fetch(`https://www.omdbapi.com/?apikey=486fea3b&s=matrix`)
       .then((response) => response.json())
       .then((data) => {
-        this.setState({ movies: data.Search, loading: false });
+        setMovies(data.Search);
+        setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
-        this.setState({ loading: false });
+        console.log(err);
+        setLoading(false);
       });
-  }
+  }, []);
 
-  searchMovies = (str, type = "all") => {
-    this.setState({ loading: true });
-    fetch(
-      `https://www.omdbapi.com/?apikey=486fea3b&s=${str}${
-        type != "all" ? `&type=${type}` : ""
-      }`
-    )
+  const searchMovies = (str, type = 'all') => {
+    setLoading(true);
+    fetch(`https://www.omdbapi.com/?apikey=486fea3b&s=${str}${type !== 'all' ? `&type=${type}` : ''}`)
       .then((response) => response.json())
       .then((data) => {
-        this.setState({ movies: data.Search, loading: false });
+        setMovies(data.Search);
+        setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
-        this.setState({ loading: false });
+        console.log(err);
+        setLoading(false);
       });
   };
 
-  render() {
-    const { movies, loading } = this.state;
-
-    return (
-      <main className={"container content"}>
-        <Search searchMovies={this.searchMovies} />
-        {loading ? <Preloader /> : <Movies movies={movies} />}
-      </main>
-    );
-  }
+  return (
+    <main className={'container content'}>
+      <Search searchMovies={searchMovies} />
+      {loading ? <Preloader /> : <Movies movies={movies} />}
+    </main>
+  );
 }
 export { Main };
